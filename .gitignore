@@ -1,3 +1,7 @@
+# Manually included files
+app/__pycache__/
+app/static/worker-pdf/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
