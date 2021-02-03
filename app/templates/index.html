@@ -1,0 +1,11 @@
+<!-- extend from base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{title}}</h1>
+<form action="" method="post" name="select_pdf" enctype="multipart/form-data">
+    <p>Please select a PDF file:</p>
+    <p>{{form.pdf_file(size=80)}}</p>
+    <p><input type="submit" value="Submit"></p>
+</form>
+{% endblock %}

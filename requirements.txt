@@ -1,0 +1,12 @@
+PyMuPDF
+click==7.1.2
+#pika==1.1.0
+Flask==1.1.2
+itsdangerous==1.1.0
+Jinja2==2.11.2
+MarkupSafe==1.1.1
+Werkzeug==1.0.1
+WTForms==2.3.1
+celery[redis]
+msgpack-python
+Pillow==7.2.0

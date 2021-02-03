@@ -1,0 +1,59 @@
+<!-- extend from base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+  #prog {
+  width: 400px;
+  border: 1px solid red;
+  height: 20px;
+  }
+  #bar {
+  width: 0px;
+  background-color: blue;
+  height: 20px;
+  }
+</style>
+<div id="wrapper"><div id="prog"><div id="bar"></div></div></div>
+<div id="pdfpl">Processing... Please wait.</div>
+
+<script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+<script>
+
+var end_file;
+  function poll() {
+      $.ajax("{{url_for('.progress', jobid=JOBID)}}", {
+          dataType: "json"
+          , success: function(resp) {
+          	  // Show progress using css
+          	  console.log("progress: " + resp.progress)
+              $("#bar").css({width: $("#prog").width() * resp.progress});
+              if(resp.progress >= 0.99) {
+                  $("#wrapper").html('');
+                  $.get("result.pdf?jobid={{JOBID}}", function(data, status){
+                    output=data;
+                    $("#pdfpl").html(output);
+                    console.log("success")
+                    });           
+                  return;
+              } else {
+                  console.log("progress: " + resp.progress)
+                  setTimeout(poll, 500.0);
+              }
+  
+          }
+      });
+  
+  }
+
+
+  
+  $(function() {
+      var JOBID = "{{ JOBID }}";
+      poll();
+  
+  });
+  </script>
+
+{% endblock %}
