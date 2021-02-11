@@ -165,7 +165,7 @@ class PDFPage:
 		#  0: No images
 		# >0: Text/Images
 
-		color = "Yellow"
+		color = "Orange"
 		ratio = self.get_ratio()
 		ratio_str = ''
 
@@ -174,10 +174,11 @@ class PDFPage:
 			color = "Green"
 		elif ratio == -1:
 			ratio_str = "<h4>Лише зображення, немає тексту</h4>"
-			сolor = "Red"
+			color = "Red"
 		elif ratio == 0:
 			ratio_str = "<h4>Лише текст, немає зображень</h4>"
-			сolor = "Green"
+			color = "Green"
+			print(f"Set color to Green: {color}")
 		else:
 			ratio_str = f'''<h4>Відношення площини тексту до площини зображень</h4>
 <p>{'{:.2f}'.format(ratio)}</p>'''
@@ -186,6 +187,8 @@ class PDFPage:
 			if ratio > 1.3:
 				color = "Green"
 		# TODO: Create styles for colouring
+
+		print(f"Color before dumping: {color}")
 
 		result = f'''<div style="color:{color}"><h3>Сторінка № {self.get_number() + 1}</h3>
 	<h4>Площина фрагментів тексту</h4>
@@ -264,7 +267,7 @@ class PDFDocument:
 		#  0: No images
 		# >0: Text/Images
 
-		color = "Yellow"
+		color = "Orange"
 		ratio = self.get_ratio()
 		ratio_str = ''
 
@@ -273,10 +276,10 @@ class PDFDocument:
 			color = "Green"
 		elif ratio == -1:
 			ratio_str = "<h2>Лише зображення, немає тексту</h2>"
-			сolor = "Red"
+			color = "Red"
 		elif ratio == 0:
 			ratio_str = "<h2>Лише текст, немає зображень</h2>"
-			сolor = "Green"
+			color = "Green"
 		else:
 			ratio_str = f'''<h2>Відношення площини тексту до площини зображень</h2>
 <p>{'{:.2f}'.format(ratio)}</p>'''
@@ -286,7 +289,7 @@ class PDFDocument:
 				color = "Green"
 		# TODO: Create styles for colouring
 
-		result = f'''<div style="color:{color}"><h1>{self.get_name() + 1}</h1>
+		result = f'''<div style="color:{color}"><h1>{self.get_name()}</h1>
 	<h2>Площина фрагментів тексту</h2>
 	<p>{'{:.2f}'.format(self.get_text_area())}</p>
 	<h2>Площина зображень</h2>
