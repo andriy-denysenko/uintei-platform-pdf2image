@@ -17,6 +17,7 @@
 </style>
 <div id="wrapper"><div id="prog"><div id="bar"></div></div></div>
 <div id="pdfpl">Processing... Please wait.</div>
+<div id="homelink"></div>
 
 <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
 <script>
@@ -34,8 +35,9 @@ var end_file;
                   $.get("result.pdf?jobid={{JOBID}}", function(data, status){
                     output=data;
                     $("#pdfpl").html(output);
-                    console.log("success")
-                    });           
+                    console.log("success");
+                    $("#homelink").html('<a href="/">На головну</a>')
+                    });
                   return;
               } else {
                   console.log("progress: " + resp.progress)
