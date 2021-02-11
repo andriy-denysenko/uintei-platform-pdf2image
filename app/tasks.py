@@ -120,7 +120,23 @@ class PDFPage:
 				for span in line.get_spans():
 					self._text_area += span.get_area()
 
-		self._ratio = self._text_area / self._images_area
+		# README: 2021-02-11 Added check for zero image or zero text area
+
+		# 0 means No images
+		self._ratio = 0
+
+		# Check for zero values
+		if self._text_area == 0:
+			if self._images_area == 0:
+				self._ratio = -2
+				# -2 means No images, No text
+			else:
+				self._ratio = -1
+				# -1 means No text
+		# There is text
+		elif self._images_area > 0:
+			self._ratio = self._text_area / self._images_area
+			# > 0 means relation
 
 	def get_width(self):
 		return self._as_dict['width']
@@ -142,20 +158,43 @@ class PDFPage:
 
 	def dump(self):
 		# TODO: Let the user set bounds for colouring
+
+		# Ratio means:
+		# -2: No text, No images
+		# -1: No text
+		#  0: No images
+		# >0: Text/Images
+
 		color = "Yellow"
-		if self.get_ratio() < 0.7:
-			color = "Red"
-		if self.get_ratio() > 1.3:
+		ratio = self.get_ratio()
+		ratio_str = ''
+
+		if ratio == -2:
+			ratio_str = "<h4>Немає тексту та зображень</h4>"
 			color = "Green"
+		elif ratio == -1:
+			ratio_str = "<h4>Лише зображення, немає тексту</h4>"
+			сolor = "Red"
+		elif ratio == 0:
+			ratio_str = "<h4>Лише текст, немає зображень</h4>"
+			сolor = "Green"
+		else:
+			ratio_str = f'''<h4>Відношення площини тексту до площини зображень</h4>
+<p>{'{:.2f}'.format(ratio)}</p>'''
+			if ratio < 0.7:
+				color = "Red"
+			if ratio > 1.3:
+				color = "Green"
 		# TODO: Create styles for colouring
 
-		result = f'''<div style="color:{color}"><h3>Страница № {self.get_number() + 1}</h3>
-<h4>Площадь фрагментов текста</h4>
-<p>{'{:.2f}'.format(self.get_text_area())}</p>
-<h4>Площадь изображений</h4>
-<p>{'{:.2f}'.format(self.get_images_area())}</p>
-<h4>Отношение площади текста к площади изображений</h4>
-<p>{'{:.2f}'.format(self.get_ratio())}</p></div>'''
+		result = f'''<div style="color:{color}"><h3>Сторінка № {self.get_number() + 1}</h3>
+	<h4>Площина фрагментів тексту</h4>
+	<p>{'{:.2f}'.format(self.get_text_area())}</p>
+	<h4>Площина зображень</h4>
+	<p>{'{:.2f}'.format(self.get_images_area())}</p>
+	{ratio_str}
+</div>'''
+
 		return result
 
 class PDFDocument:
@@ -180,9 +219,23 @@ class PDFDocument:
 			self._text_area += page.get_text_area()
 			self._images_area += page.get_images_area()
 
-		# Determine if text prevails ove images:
-		# Calculate relation of text area to image area
-		self._ratio = self._text_area / self._images_area
+		# README: 2021-02-11 Added check for zero image or zero text area
+
+		# 0 means No images
+		self._ratio = 0
+
+		# Check for zero values
+		if self._text_area == 0:
+			if self._images_area == 0:
+				self._ratio = -2
+				# -2 means No images, No text
+			else:
+				self._ratio = -1
+				# -1 means No text
+		# There is text
+		elif self._images_area > 0:
+			self._ratio = self._text_area / self._images_area
+			# > 0 means relation
 
 	def get_page_count(self):
 		return self._doc.page_count
@@ -203,13 +256,43 @@ class PDFDocument:
 		return self._doc.name
 
 	def dump(self):
-		result = f'''<h1>{self.get_name()}</h1>
-<h2>Площадь фрагментов текста</h2>
-<p>{'{:.2f}'.format(self.get_text_area())}</p>
-<h2>Площадь изображений</h2>
-<p>{'{:.2f}'.format(self.get_images_area())}</p>
-<h2>Отношение площади текста к площади изображений</h2>
-<p>{'{:.2f}'.format(self.get_ratio())}</p>'''
+		# TODO: Let the user set bounds for colouring
+
+		# Ratio means:
+		# -2: No text, No images
+		# -1: No text
+		#  0: No images
+		# >0: Text/Images
+
+		color = "Yellow"
+		ratio = self.get_ratio()
+		ratio_str = ''
+
+		if ratio == -2:
+			ratio_str = "<h2>Немає тексту та зображень</h2>"
+			color = "Green"
+		elif ratio == -1:
+			ratio_str = "<h2>Лише зображення, немає тексту</h2>"
+			сolor = "Red"
+		elif ratio == 0:
+			ratio_str = "<h2>Лише текст, немає зображень</h2>"
+			сolor = "Green"
+		else:
+			ratio_str = f'''<h2>Відношення площини тексту до площини зображень</h2>
+<p>{'{:.2f}'.format(ratio)}</p>'''
+			if ratio < 0.7:
+				color = "Red"
+			if ratio > 1.3:
+				color = "Green"
+		# TODO: Create styles for colouring
+
+		result = f'''<div style="color:{color}"><h1>{self.get_name() + 1}</h1>
+	<h2>Площина фрагментів тексту</h2>
+	<p>{'{:.2f}'.format(self.get_text_area())}</p>
+	<h2>Площина зображень</h2>
+	<p>{'{:.2f}'.format(self.get_images_area())}</p>
+	{ratio_str}
+</div>'''
 		return result
 
 	def close(self):
