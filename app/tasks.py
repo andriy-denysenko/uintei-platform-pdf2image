@@ -33,37 +33,86 @@ def get_job(job_id):
 # TODO: refactor using class which will have an 'area' field
 
 class PDFBBox:
+	'''
+	Represents a 'bbox' object for each class having it.
+	'''
 	def __init__(self, bbox):
+		'''Initializes an instance with bbox node (a 4-tuple)'''
 		self._bbox = bbox
 
 	def get_x0(self):
+		'''Gets the leftmost corner x
+
+		Returns:
+		int: the leftmost corner x
+		'''
+		
 		return self._bbox[0]
 
 	def get_x1(self):
+		'''Gets the rightmost corner x
+
+		Returns:
+		int: the rightmost corner x
+		'''
+
 		return self._bbox[1]
 
 	def get_y0(self):
+		'''Gets the highest y
+
+		Returns:
+		int: the lowest y
+		'''
+
 		return self._bbox[2]
 
 	def get_y1(self):
+		'''Gets the lowest y
+
+		Returns:
+		int: the lowest y
+		'''
+
 		return self._bbox[3]
 
 	def get_area(self):
+		'''Calculates the box area
+
+		Returns:
+		float: box area'''
 		return (self.get_x1() - self.get_x0()) * (self.get_y1() - self.get_y0())
 
 class PDFSpan:
+	'''
+	Represents a 'span' object.
+	'''
 	def __init__(self, span):
+		'''Initializes an instance with a span and a bbox'''
 		self._span = span
 		self._bbox = PDFBBox(self._span['bbox'])
 
 	def get_area(self):
+		'''Gets span area
+
+		Return:
+		float: span area'''
 		return self._bbox.get_area()
 
 	def get_text(self):
+		'''Gets span text
+
+		Returns:
+		str: span text'''
+
 		return self._span['text']
 
 class PDFLine:
+	'''
+	Represents a 'line' object.
+	'''
 	def __init__(self, line):
+		'''Initializes an instance with a line node and creates spans'''
 		self._line = line
 		self._bbox = PDFBBox(self._line['bbox'])
 		self._spans = []
@@ -72,13 +121,28 @@ class PDFLine:
 			self._spans.append(sp)
 
 	def get_area(self):
+		'''Gets line area
+
+		Return:
+		float: line area'''
+
 		return self._bbox.get_area()
 
 	def get_spans(self):
+		'''Gets line span list
+
+		Return:
+		list(PDFSpan): line span list'''
 		return self._spans
 
 class PDFBlock:
+	'''
+	Represents a 'block' object.
+	'''
 	def __init__(self, block):
+		'''Initializes an instance
+
+		Sets a block node and a bbox and creates lines which in turn create spans'''
 		self._block = block
 		self._bbox = PDFBBox(self._block['bbox'])
 		self._lines = []
@@ -87,20 +151,54 @@ class PDFBlock:
 			self._lines.append(ln)
 
 	def get_number(self):
+		'''Gets block number
+
+		Return:
+		int: block number'''
+
 		return self._block['number']
 
 	def get_type(self):
+		'''Gets block type
+
+		Return:
+		int: block type (0 for text, 1 for image)'''
+
+		# README: the TextPage object does not return 1 for image blocks
+		
 		return self._block['type']
 
 	def get_area(self):
+		'''Gets block area
+
+		Return:
+		float: block area'''
+		
 		return self._bbox.get_area()
 
 	def get_lines(self):
+		'''Gets block line list
+
+		Return:
+		list(PDFLine): block line list'''
+		
 		return self._lines
 
 
 class PDFPage:
+	'''
+	Represents a 'page' object.
+	'''
 	def __init__(self, page):
+		'''Initializes a page instance
+
+		Sets a page and a textpage,
+		extracts child objects as a dictionary,
+		gets all images
+		and creates all blocks which in turn create lines and spans.
+		Calculates text and image area and relation (text/image area)
+		'''
+
 		self._page = page
 		self._text_page = self._page.get_textpage()
 		self._as_dict = self._text_page.extractDICT()
@@ -139,25 +237,60 @@ class PDFPage:
 			# > 0 means relation
 
 	def get_width(self):
+		'''Gets the width attribute
+
+		Returns:
+		float: height'''
 		return self._as_dict['width']
 
 	def get_height(self):
+		'''Gets the height attribute
+
+		Returns:
+		float: height'''
 		return self._as_dict['height']
 
 	def get_number(self):
+		'''Gets the page number
+
+		Returns:
+		int: page number'''
 		return self._page.number
 
 	def get_images_area(self):
+		'''Gets images area
+
+		Returns:
+		float: text area'''
 		return self._images_area
 
 	def get_text_area(self):
+		'''Gets the text area
+
+		Returns:
+		float: text area'''
 		return self._text_area
 
 	def get_ratio(self):
+		'''Gets the text/image area ratio
+
+		Returns:
+		float: text/image area ratio'''
 		return self._ratio
 
 	def dump(self):
+		'''Formats text and image statistics
+
+		Returns HTML code with coloured statistics of text/image area relation for the page.
+
+		Returns:
+		str: HTML code with coloured statistics
+
+		'''
+
 		# TODO: Let the user set bounds for colouring
+
+		# README: 2021-02-11 Added check for ratio values
 
 		# Ratio means:
 		# -2: No text, No images
@@ -201,7 +334,16 @@ class PDFPage:
 		return result
 
 class PDFDocument:
+	'''
+	Implements a pdf document object.
+	'''
 	def __init__(self, pdf_filename):
+		'''Initializes a document instance
+
+		Creates a list PDFPage objects which do the magic
+		of all child objects creation and area calculation.
+		Calculates text and image area and relation (text/image area)
+		'''
 		
 		# Open the document
 		self._doc = fitz.open(pdf_filename)
@@ -241,24 +383,60 @@ class PDFDocument:
 			# > 0 means relation
 
 	def get_page_count(self):
+		'''Gets page count
+
+		Returns:
+		int: page count'''
 		return self._doc.page_count
 
 	def get_pages(self):
+		'''Gets PDFPage list
+
+		Returns:
+		list(PDFPage): list of page objects'''
+
 		return self._pages
 
-	def get_text_area(self):
-		return self._text_area
-
 	def get_images_area(self):
+		'''Gets images area
+
+		Returns:
+		float: text area'''
 		return self._images_area
 
+	def get_text_area(self):
+		'''Gets the text area
+
+		Returns:
+		float: text area'''
+		return self._text_area
+
 	def get_ratio(self):
+		'''Gets the text/image area ratio
+
+		Returns:
+		float: text/image area ratio'''
 		return self._ratio
 
 	def get_name(self):
+		'''Gets the document name
+
+		Returns:
+		str: document name'''
 		return self._doc.name
 
 	def dump(self):
+		'''Formats text and image statistics
+
+		Returns HTML code with coloured statistics of text/image area relation
+		for a document as a whole, and for each individual page.
+
+		Returns:
+		str: HTML code with coloured statistics
+
+		'''
+
+		# README: 2021-02-11 Added check for ratio values
 		# TODO: Let the user set bounds for colouring
 
 		# Ratio means:
@@ -299,20 +477,38 @@ class PDFDocument:
 		return result
 
 	def close(self):
-		# Release resources and the file
+		'''Releases the resources and the file'''
 		self._doc.close()
 		self._is_closed = True
 
 	def is_closed(self):
+		'''Tells if the document is closed
+
+		Returns:
+		bool: True of the document is closed, False otherwise'''
+
 		return self._is_closed
 
 
 @CELERY.task()
 def process_pdf(pdf_filename):
+	'''Formats text and image statistics
+
+	Returns HTML code with coloured statistics of text/image area relation
+	for a document as a whole, and for each individual page.
+
+	Returns:
+	str: HTML code with coloured statistics
+
+	'''
+
 	doc = PDFDocument(pdf_filename)
 	result = doc.dump()
 	for page in doc.get_pages():
 		result += page.dump()
+	
+	# Release the file and its resources
 	doc.close()
+
 	return result
 
