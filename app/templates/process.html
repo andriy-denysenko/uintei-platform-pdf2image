@@ -15,9 +15,10 @@
   height: 20px;
   }
 </style>
+<div id="homelink_top"></div>
 <div id="wrapper"><div id="prog"><div id="bar"></div></div></div>
 <div id="pdfpl">Processing... Please wait.</div>
-<div id="homelink"></div>
+<div id="homelink_bottom"></div>
 
 <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
 <script>
@@ -36,7 +37,8 @@ var end_file;
                     output=data;
                     $("#pdfpl").html(output);
                     console.log("success");
-                    $("#homelink").html('<a href="/">На головну</a>')
+                    $("#homelink_top").html('<a href="/">На головну</a>')
+                    $("#homelink_bottom").html('<a href="/">На головну</a>')
                     });
                   return;
               } else {
